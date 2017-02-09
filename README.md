@@ -17,7 +17,8 @@ In deployment, our server will be on [Heroku](https://www.heroku.com/). However,
 ## Setting up
 
 1. Config our Node server
-  - Get the App ID and App Secret in Settings tab on `developers.facebook.com`
+  - Get the App Secret in Settings tab on `developers.facebook.com`
+  - Get `pageAccessToken` from Messenger -> Settings
   - For `validationToken`, you can put be whatever you want
   - For `serverURL`, you have to tunnel your localhost. If you have installed ngrok on your computer, type `ngrok http 5000` in the terminal. `5000` is the default port that you specify in your server.
   
@@ -26,6 +27,18 @@ In deployment, our server will be on [Heroku](https://www.heroku.com/). However,
   - Fill in your ngrok url with the `\webhook` route. Example: `https://d9d7d46e.ngrok.io/webhook`
   - Fill in your `validationToken` specified in step 1
   - Subscripe the webhook with a page
+  
+## Development
+
+### Receiving a message from messenger
+
+### Sending a message to messenger
+
+### Adding AI (wit.ai)
+
+## Deployment
+
+### Setting up Heroku
 
 ## More tutorials + links
 
