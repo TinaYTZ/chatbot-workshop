@@ -20,7 +20,7 @@ In deployment, our server will be on [Heroku](https://www.heroku.com/). However,
   - Get the App Secret in Settings tab on `developers.facebook.com`
   - Get `pageAccessToken` from Messenger -> Settings
   - For `validationToken`, you can put be whatever you want
-  - For `serverURL`, you have to tunnel your localhost. If you have installed ngrok on your computer, type `ngrok http 5000` in the terminal. `5000` is the default port that you specify in your server.
+  - For `serverURL`, you have to tunnel your localhost. If you have installed ngrok on your computer, type `ngrok http 3333` in the terminal. `3333` is the default port that you specify in your server.
   
 2. Set up webhook
   - Go to Product -> Messenger -> Webhooks
@@ -31,8 +31,12 @@ In deployment, our server will be on [Heroku](https://www.heroku.com/). However,
 ## Development
 
 ### Receiving a message from messenger
+Open file `basic-receiver.js` and start exploring. This is a mini server I created with the code from `app.js`. Look down to `app.post` and follow the workshop. 
+
+[Format of the data Facebook send us](https://developers.facebook.com/docs/messenger-platform/webhook-reference#format)
 
 ### Sending a message to messenger
+Open file `basic-sender.js` and copy all the code over `basic-receiver.js`. The code is from FB and it gives us a really good black box to use. If you want to explore more about sending messages to the bot, check out [here](https://developers.facebook.com/docs/messenger-platform/send-api-reference).
 
 ### Adding AI (wit.ai)
 
