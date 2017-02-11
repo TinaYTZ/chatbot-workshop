@@ -80,13 +80,32 @@ const findOrCreateSession = (fbid) => {
   return sessionId;
 };
 
+// Our bot actions
 const actions = {
-  send(request, response) {
-    const {sessionId, context, entities} = request;
-    const {text, quickreplies} = response;
-    console.log('sending...', JSON.stringify(response));
+  send({sessionId}, {text}) {
+    // Retrieve the Facebook user whose session belongs to
+    const recipientId = sessions[sessionId].fbid;
+    if (recipientId) {
+      // forward our bot response to her.
+      // We return a promise to let our bot know when we're done sending
+      return sendTextMessage(recipientId, text)
+      .then(() => null)
+      .catch((err) => {
+        console.error(
+          'Oops! An error occurred while forwarding the response to',
+          recipientId,
+          ':',
+          err.stack || err
+        );
+      });
+    } else {
+      console.error('Oops! Couldn\'t find user for session:', sessionId);
+      // Giving the wheel back to our bot
+      return Promise.resolve()
+    }
   },
-  // Implement your own actions here
+  // You should implement your custom actions here
+  // See https://wit.ai/docs/quickstart
 };
 
 // Setting up our bot
@@ -169,6 +188,7 @@ app.post('/webhook', function (req, res) {
           receivedMessage(messagingEvent);
         } else {
           // Ignore all other events for now
+          // console.log("Webhook received unknown messagingEvent: ", messagingEvent);
         }
       });
     });
@@ -232,11 +252,21 @@ function receivedMessage(event) {
   if (messageText) {
     var sessionId = findOrCreateSession(senderID);
 
-    wit.message(messageText, {})
-    .then((data) => {
-      console.log('Got Wit.ai response: ' + JSON.stringify(data, null, 2));
+    // A higher-level method to the Wit converse API. runActions resets the last
+    // turn on new messages and errors.
+    wit.runActions(
+      sessionId, // a unique identifier describing the user session
+      messageText, // the text received from the user
+      sessions[sessionId].context // the object representing the session state
+      // maxSteps - (optional) the maximum number of actions to execute
+      // (defaults to 5)
+    ).then((context) => {
+      console.log('Waiting for next user messages');
+      sessions[sessionId].context = context;
     })
-    .catch(console.error);
+    .catch((err) => {
+      console.error('Oops! Got an error from Wit: ', err.stack || err);
+    })
 
   } else if (messageAttachments) {
     sendTextMessage(senderID, "Message with attachment received");
@@ -258,7 +288,7 @@ function sendTextMessage(recipientId, messageText) {
     }
   };
 
-  callSendAPI(messageData);
+  return callSendAPI(messageData);
 }
 
 /*
@@ -267,28 +297,33 @@ function sendTextMessage(recipientId, messageText) {
  *
  */
 function callSendAPI(messageData) {
-  request({
-    uri: 'https://graph.facebook.com/v2.6/me/messages',
-    qs: { access_token: PAGE_ACCESS_TOKEN },
-    method: 'POST',
-    json: messageData
+  return new Promise((resolve, reject) => {
+    request({
+      uri: 'https://graph.facebook.com/v2.6/me/messages',
+      qs: { access_token: PAGE_ACCESS_TOKEN },
+      method: 'POST',
+      json: messageData
 
-  }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      var recipientId = body.recipient_id;
-      var messageId = body.message_id;
+    }, function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        var recipientId = body.recipient_id;
+        var messageId = body.message_id;
 
-      if (messageId) {
-        console.log("Successfully sent message with id %s to recipient %s",
-          messageId, recipientId);
+        if (messageId) {
+          console.log("Successfully sent message with id %s to recipient %s",
+            messageId, recipientId);
+        } else {
+          console.log("Successfully called Send API for recipient %s",
+            recipientId);
+        }
+
+        resolve(body);
       } else {
-      console.log("Successfully called Send API for recipient %s",
-        recipientId);
+        console.error("Failed calling Send API", response.statusCode,
+          response.statusMessage, body.error);
+        reject(error);
       }
-    } else {
-      console.error("Failed calling Send API", response.statusCode,
-        response.statusMessage, body.error);
-    }
+    });
   });
 }
 
