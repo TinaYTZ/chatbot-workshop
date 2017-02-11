@@ -70,3 +70,7 @@ Your messenger bot is still in development. That means, other people other than 
 - [Official Facebook's Walk-through](https://developers.facebook.com/docs/messenger-platform/quickstart)
 - [The Complete Guide](https://developers.facebook.com/docs/messenger-platform/implementation)
 - [Facebook Dev Site](https://developers.facebook.com/docs/messenger-platform/)
+
+## Contact
+
+If you need help, find me on [Facebook](https://www.facebook.com/minhhoangtcu) or on Slack.
